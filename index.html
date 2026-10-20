@@ -18,11 +18,11 @@
   <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <!-- ?v= は更新のたびに1つ上げる（ブラウザに古いファイルが残って、表示が崩れるのを防ぐ） -->
-  <link rel="stylesheet" href="style.css?v=1">
+  <link rel="stylesheet" href="style.css?v=2">
   <!-- content.js（文言）→ scoring.js（採点）→ app.js（動き）の順に読み込む -->
-  <script src="content.js?v=1" defer></script>
+  <script src="content.js?v=2" defer></script>
   <script src="scoring.js?v=1" defer></script>
-  <script src="app.js?v=1" defer></script>
+  <script src="app.js?v=2" defer></script>
 </head>
 <body>
   <div class="app">
@@ -136,6 +136,7 @@
         <div class="title-block">
           <h2 class="lead" id="s-title" tabindex="-1"></h2>
           <p class="meta-line" id="s-date"></p>
+          <p class="print-name print-only" id="print-name" hidden></p>
         </div>
 
         <section class="card">
@@ -159,6 +160,11 @@
 
         <div class="save-box no-print">
           <p class="hint" id="s-saved" data-text="summary.saved" hidden></p>
+          <div class="field">
+            <label class="field-label" for="s-name" data-text="summary.nameLabel"></label>
+            <input class="text-input" id="s-name" type="text" maxlength="30" autocomplete="name" enterkeyhint="done" aria-describedby="s-name-hint" data-placeholder="summary.namePlaceholder">
+            <p class="hint" id="s-name-hint" data-text="summary.nameHint"></p>
+          </div>
           <div class="actions">
             <button type="button" class="btn btn-secondary btn-block" data-action="copy" data-text="summary.copyButton"></button>
             <button type="button" class="btn btn-secondary btn-block" id="print-btn" data-action="print" data-text="summary.printButton"></button>

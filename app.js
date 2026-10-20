@@ -33,6 +33,7 @@
     resumeHours: 12, // 途中で閉じたとき、この時間内に開けば続きから表示する
     maxRecords: 100, // 端末に残す過去の結果の数（超えたら古いものから消す）
     textMaxLength: 400, // 記入欄の文字数の上限
+    nameMaxLength: 30, // お名前の文字数の上限
     saveDelayMs: 400, // 記入が止まってから保存するまでの時間
   });
 
@@ -79,7 +80,7 @@
     let available = true;
 
     function blank() {
-      return { version: SCHEMA_VERSION, current: null, records: [] };
+      return { version: SCHEMA_VERSION, current: null, records: [], name: "" };
     }
 
     /**
@@ -92,6 +93,7 @@
         version: SCHEMA_VERSION,
         current: isObject(data.current) ? data.current : null,
         records: Array.isArray(data.records) ? data.records.filter(isObject) : [],
+        name: typeof data.name === "string" ? data.name : "",
       });
     }
 
@@ -163,6 +165,12 @@
       },
       findRecord(id) {
         return state.records.find((r) => r.id === id) || null;
+      },
+      /** 印刷・コピーに入れるお名前（任意）。次回も同じ名前を出せるように、記録とは別に1つだけ持つ */
+      setName(name) {
+        if (state.name === name) return;
+        state.name = name;
+        save();
       },
       /** このアプリの記録だけを消す（同じオリジンの他のツールの記録には触れない） */
       clearAll() {
@@ -310,6 +318,8 @@
     el.copyStatus = $("#copy-status");
     el.copyFallback = $("#copy-fallback");
     el.copyText = $("#copy-text");
+    el.sName = $("#s-name");
+    el.printName = $("#print-name");
     el.closingLinks = $("#closing-links");
     el.about = $("#about");
     el.aboutBasis = $("#about-basis");
@@ -324,11 +334,15 @@
     return node;
   }
 
-  /** data-text="道すじ" の要素に、content.js の文言を流し込む */
+  /** data-text="道すじ"・data-placeholder="道すじ" の要素に、content.js の文言を流し込む */
   function applyContent(root) {
     root.querySelectorAll("[data-text]").forEach((node) => {
       const v = text(node.dataset.text);
       if (typeof v === "string") node.textContent = v;
+    });
+    root.querySelectorAll("[data-placeholder]").forEach((node) => {
+      const v = text(node.dataset.placeholder);
+      if (typeof v === "string") node.placeholder = v;
     });
   }
 
@@ -368,6 +382,7 @@
 
     el.rAnswer.maxLength = CONFIG.textMaxLength;
     el.stepAnswer.maxLength = CONFIG.textMaxLength;
+    el.sName.maxLength = CONFIG.nameMaxLength;
 
     C.closing.links.forEach((link) => {
       const li = make("li");
@@ -568,8 +583,21 @@
       el.sBack.hidden = !isCurrent;
       el.copyStatus.textContent = "";
       el.copyFallback.hidden = true;
+      el.sName.value = Store.state.name;
+      renderPrintName();
     },
   };
+
+  /** 印刷に出すお名前の行（空欄なら出さない） */
+  function renderPrintName() {
+    const name = currentName();
+    el.printName.hidden = !name;
+    el.printName.textContent = name ? fmt(C.summary.nameLine, { name }) : "";
+  }
+
+  function currentName() {
+    return String(Store.state.name || "").trim();
+  }
 
   function hasAnyAnswer(answers) {
     return isObject(answers) && Object.keys(answers).some((k) => Array.isArray(answers[k]) && answers[k].some((v) => v !== null));
@@ -697,7 +725,9 @@
     if (prev) resultsOf(prev).forEach((r) => (prevById[r.id] = r));
     const ref = reflectionOf(record);
 
-    const lines = [fmt(C.summary.copyHeader, { date: recordDate(record) }), "", C.summary.copyBalance];
+    const lines = [fmt(C.summary.copyHeader, { date: recordDate(record) })];
+    if (currentName()) lines.push(fmt(C.summary.nameLine, { name: currentName() }));
+    lines.push("", C.summary.copyBalance);
     S.sortByLeak(results).forEach((r) => {
       let line = fmt(C.summary.copyRow, { name: r.name, status: statusLabel(r.status), value: S.formatBalance(r.balanceTenths) });
       if (prevById[r.id]) line += fmt(C.summary.copyRowPrevious, { value: S.formatBalance(prevById[r.id].balanceTenths) });
@@ -744,6 +774,26 @@
     } else {
       showFallback();
     }
+  }
+
+  /**
+   * 印刷するあいだだけ、ページの名前を「人生のリソースの棚卸し_お名前_20261020」にする
+   * （「PDFに保存」のファイル名になることが多いため。ブラウザのメニューから印刷したときも同じ）
+   */
+  function setPrintTitle() {
+    const record = currentView() === "summary" && summaryParams && Store.findRecord(summaryParams.recordId);
+    if (!record) return;
+    const date = (typeof record.date === "string" ? record.date : dateKey(record.takenAt)).replace(/-/g, "");
+    const name = currentName();
+    document.title = fmt(name ? C.summary.printTitleWithName : C.summary.printTitle, { name, date });
+  }
+
+  function restoreTitle() {
+    document.title = C.meta.docTitle;
+  }
+
+  function currentView() {
+    return document.body.dataset.screen;
   }
 
   function printSummary() {
@@ -1024,6 +1074,14 @@
       if (document.visibilityState === "hidden") flushTexts();
     });
     window.addEventListener("pagehide", flushTexts);
+
+    // お名前（任意）：入れるたびに保存し、印刷の行にも反映する
+    el.sName.addEventListener("input", () => {
+      Store.setName(el.sName.value.slice(0, CONFIG.nameMaxLength));
+      renderPrintName();
+    });
+    window.addEventListener("beforeprint", setPrintTitle);
+    window.addEventListener("afterprint", restoreTitle);
   }
 
   function init() {

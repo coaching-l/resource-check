@@ -1156,8 +1156,14 @@ main {
     display: none !important;
   }
 
-  .print-only {
+  .print-only:not([hidden]) {
     display: flex !important;
+  }
+
+  .print-name {
+    color: var(--heading);
+    font-size: 1.0625rem;
+    font-weight: 700;
   }
 
   .print-head {
