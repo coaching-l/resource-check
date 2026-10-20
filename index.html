@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#02172f" media="(prefers-color-scheme: dark)">
+  <!-- 次の3つは、JavaScript が動く前（LINE などでリンクを貼ったときの表示など）に使われるため、ここにも書いています。
+       content.js の meta.title・meta.subtitle を変えたときは、ここもそろえてください -->
+  <title>人生のリソースの棚卸し | COACHING-L</title>
+  <meta name="description" content="時間・エネルギー・感情の現在地を知る5分のセルフチェック">
+  <meta name="apple-mobile-web-app-title" content="リソースの棚卸し">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <!-- ?v= は更新のたびに1つ上げる（ブラウザに古いファイルが残って、表示が崩れるのを防ぐ） -->
+  <link rel="stylesheet" href="style.css?v=1">
+  <!-- content.js（文言）→ scoring.js（採点）→ app.js（動き）の順に読み込む -->
+  <script src="content.js?v=1" defer></script>
+  <script src="scoring.js?v=1" defer></script>
+  <script src="app.js?v=1" defer></script>
+</head>
+<body>
+  <div class="app">
+    <main>
+      <noscript><p class="notice">このページを使うには JavaScript を有効にしてください。</p></noscript>
+      <p class="notice notice-muted" id="storage-notice" data-text="common.storageUnavailable" hidden></p>
+
+      <!-- 0. スタート -->
+      <section class="view" data-view="start" hidden>
+        <header class="brand-header">
+          <img class="brand-logo" src="icons/logo-144.png" width="52" height="52" alt="">
+          <p class="brand-name" data-text="meta.brand"></p>
+        </header>
+
+        <div class="title-block">
+          <h1 class="app-title" tabindex="-1" data-text="meta.title"></h1>
+          <p class="subtitle" data-text="meta.subtitle"></p>
+          <p class="meta-line" data-text="start.duration"></p>
+        </div>
+
+        <p class="intro" data-text="start.intro"></p>
+        <p class="notice" data-text="start.notDiagnosis"></p>
+        <p class="notice notice-muted" id="start-status" role="status" hidden></p>
+
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-large btn-block" id="start-btn" data-action="start"></button>
+          <button type="button" class="btn btn-secondary btn-block" id="last-btn" data-action="open-last" data-text="start.lastResultButton" aria-describedby="last-date" hidden></button>
+          <p class="hint hint-center" id="last-date" hidden></p>
+        </div>
+
+        <p class="provider" data-text="meta.provider"></p>
+      </section>
+
+      <!-- 1. 質問（1画面に1領域・4問） -->
+      <section class="view" data-view="questions" hidden>
+        <div class="progress">
+          <p class="progress-label" id="q-progress"></p>
+          <div class="progress-steps" id="q-steps" aria-hidden="true"></div>
+        </div>
+        <h2 class="lead" id="q-title" tabindex="-1"></h2>
+        <p class="hint" data-text="questions.lead"></p>
+        <div class="question-list" id="q-list"></div>
+        <div class="actions">
+          <p class="hint hint-center" id="q-remaining" aria-live="polite"></p>
+          <button type="button" class="btn btn-primary btn-large btn-block" id="q-next" data-action="q-next"></button>
+          <button type="button" class="btn btn-ghost btn-block" data-action="q-back" data-text="common.back"></button>
+        </div>
+      </section>
+
+      <!-- 3. 結果 -->
+      <section class="view" data-view="result" hidden>
+        <h2 class="lead" tabindex="-1" data-text="result.title"></h2>
+        <figure class="chart-box">
+          <figcaption class="chart-note" data-text="result.howToRead"></figcaption>
+          <div id="result-chart"></div>
+        </figure>
+        <div class="summary-text" id="result-summary"></div>
+        <p class="notice notice-care" id="result-support" data-text="result.supportNote" hidden></p>
+        <p class="disclaimer" data-text="result.disclaimer"></p>
+        <button type="button" class="btn btn-primary btn-large btn-block" data-action="to-reflect" data-text="result.toReflection"></button>
+      </section>
+
+      <!-- 4. ふりかえり（1画面に1問・3問） -->
+      <section class="view" data-view="reflect" hidden>
+        <div class="progress">
+          <p class="progress-label" id="r-progress"></p>
+          <div class="progress-steps" id="r-steps" aria-hidden="true"></div>
+        </div>
+        <h2 class="lead" id="r-title" tabindex="-1"></h2>
+        <p id="r-intro" hidden></p>
+        <p class="notice paper-guide" id="r-paper" data-text="reflect.paperGuide" hidden></p>
+        <div class="field">
+          <p class="question" id="r-question"></p>
+          <div class="field" id="r-choices-box" hidden>
+            <p class="field-label" id="r-choices-label" data-text="reflect.choicesLabel"></p>
+            <div class="chips chips-2" id="r-choices" role="group" aria-labelledby="r-question r-choices-label"></div>
+          </div>
+          <label class="field-label" id="r-answer-label" for="r-answer" data-text="reflect.answerLabel"></label>
+          <textarea class="text-input note-input" id="r-answer" rows="5" maxlength="400" aria-labelledby="r-question r-answer-label" aria-describedby="r-hint"></textarea>
+          <p class="hint" id="r-hint" data-text="reflect.optionalHint"></p>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-large btn-block" data-action="r-next" data-text="common.next"></button>
+          <button type="button" class="btn btn-ghost btn-block" data-action="r-back" data-text="common.back"></button>
+        </div>
+      </section>
+
+      <!-- 5. 小さな一歩 -->
+      <section class="view" data-view="step" hidden>
+        <h2 class="lead" tabindex="-1" data-text="step.title"></h2>
+        <div class="field">
+          <label class="question" for="step-answer" data-text="step.question"></label>
+          <textarea class="text-input note-input" id="step-answer" rows="4" maxlength="400" aria-describedby="step-hint"></textarea>
+          <p class="hint" id="step-hint" data-text="step.hint"></p>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-large btn-block" data-action="to-summary" data-text="step.toSummary"></button>
+          <button type="button" class="btn btn-ghost btn-block" data-action="step-back" data-text="common.back"></button>
+        </div>
+      </section>
+
+      <!-- 5'. まとめ（今回の結果・前回の結果のどちらにも使う） -->
+      <section class="view" data-view="summary" hidden>
+        <div class="print-head print-only">
+          <img class="brand-logo" src="icons/logo-144.png" width="40" height="40" alt="">
+          <div>
+            <p class="brand-name" data-text="meta.brand"></p>
+            <p class="print-title" data-text="meta.title"></p>
+          </div>
+        </div>
+        <div class="title-block">
+          <h2 class="lead" id="s-title" tabindex="-1"></h2>
+          <p class="meta-line" id="s-date"></p>
+        </div>
+
+        <section class="card">
+          <h3 class="section-title" data-text="result.title"></h3>
+          <div id="s-chart"></div>
+          <div class="summary-text" id="s-summary"></div>
+          <p class="notice notice-care" id="s-support" data-text="result.supportNote" hidden></p>
+        </section>
+
+        <section class="card">
+          <h3 class="section-title" id="s-reflect-title"></h3>
+          <dl class="qa-list" id="s-reflect"></dl>
+        </section>
+
+        <section class="card">
+          <h3 class="section-title" data-text="summary.stepTitle"></h3>
+          <p class="answer-text" id="s-step"></p>
+        </section>
+
+        <p class="disclaimer" data-text="result.disclaimer"></p>
+
+        <div class="save-box no-print">
+          <p class="hint" id="s-saved" data-text="summary.saved" hidden></p>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary btn-block" data-action="copy" data-text="summary.copyButton"></button>
+            <button type="button" class="btn btn-secondary btn-block" id="print-btn" data-action="print" data-text="summary.printButton"></button>
+          </div>
+          <p class="hint" data-text="summary.printHint"></p>
+          <p class="hint hint-strong" id="copy-status" role="status"></p>
+          <div class="copy-fallback" id="copy-fallback" hidden>
+            <textarea class="text-input" id="copy-text" rows="10" readonly aria-labelledby="copy-status"></textarea>
+          </div>
+        </div>
+
+        <p class="again" data-text="summary.again"></p>
+
+        <section class="closing no-print">
+          <h3 class="section-title" data-text="closing.title"></h3>
+          <p data-text="closing.body"></p>
+          <ul class="link-list" id="closing-links"></ul>
+        </section>
+
+        <div class="actions no-print">
+          <button type="button" class="btn btn-primary btn-block" data-action="to-start" data-text="summary.backToStart"></button>
+          <button type="button" class="btn btn-ghost btn-block" id="s-back" data-action="summary-back" data-text="summary.backToStep" hidden></button>
+        </div>
+      </section>
+
+      <!-- 7. このセルフチェックの背景（スタートとまとめの下に出す） -->
+      <details class="disclosure about no-print" id="about" hidden>
+        <summary data-text="about.title"></summary>
+        <div class="about-body">
+          <p data-text="about.body"></p>
+          <dl class="about-list">
+            <dt data-text="about.overallLabel"></dt>
+            <dd data-text="about.overall"></dd>
+            <dt data-text="about.basisLabel"></dt>
+            <dd><ul class="plain-list" id="about-basis"></ul></dd>
+            <dt data-text="about.referencesLabel"></dt>
+            <dd><ul class="reference-list" id="about-references"></ul></dd>
+          </dl>
+        </div>
+      </details>
+
+      <!-- 記録を消す（スタートとまとめに出す） -->
+      <div class="clear-box no-print" id="clear-box" hidden>
+        <button type="button" class="btn btn-ghost btn-small btn-block" data-action="clear" data-text="start.clearButton"></button>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <p class="footer-brand" data-text="meta.brand"></p>
+      <p class="footer-privacy" data-text="common.privacy"></p>
+    </footer>
+  </div>
+</body>
+</html>
