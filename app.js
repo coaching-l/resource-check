@@ -321,6 +321,7 @@
     el.sName = $("#s-name");
     el.printName = $("#print-name");
     el.closingLinks = $("#closing-links");
+    el.openingNotes = $("#opening-notes");
     el.about = $("#about");
     el.aboutBasis = $("#about-basis");
     el.aboutReferences = $("#about-references");
@@ -394,6 +395,7 @@
       el.closingLinks.appendChild(li);
     });
 
+    C.start.openingNotes.forEach((line) => el.openingNotes.appendChild(make("li", "", line)));
     C.about.basis.forEach((line) => el.aboutBasis.appendChild(make("li", "", line)));
     C.about.references.forEach((ref) => {
       const li = make("li");

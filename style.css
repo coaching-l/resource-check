@@ -270,6 +270,27 @@ main {
   line-height: 1.85;
 }
 
+/* ご利用にあたっての注意（スタート画面） */
+.opening-note {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.875rem;
+}
+
+.opening-title {
+  color: var(--heading);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.opening-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 1.25em;
+}
+
 .provider {
   color: var(--text-muted);
   font-size: 0.8125rem;
@@ -890,6 +911,9 @@ main {
 }
 
 .again {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   padding: 16px;
   border: 1px solid var(--line);
   border-top: 3px solid var(--gold); /* 1px の枠より後に書く（ホームページのカードと同じ組み方） */
@@ -900,6 +924,12 @@ main {
   text-align: center;
   text-wrap: balance;
   word-break: auto-phrase;
+}
+
+.again-note {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
 /* 結びの案内（控えめに） */
