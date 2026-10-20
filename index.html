@@ -18,11 +18,11 @@
   <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <!-- ?v= は更新のたびに1つ上げる（ブラウザに古いファイルが残って、表示が崩れるのを防ぐ） -->
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
   <!-- content.js（文言）→ scoring.js（採点）→ app.js（動き）の順に読み込む -->
-  <script src="content.js?v=2" defer></script>
+  <script src="content.js?v=3" defer></script>
   <script src="scoring.js?v=1" defer></script>
-  <script src="app.js?v=2" defer></script>
+  <script src="app.js?v=3" defer></script>
 </head>
 <body>
   <div class="app">
@@ -52,6 +52,13 @@
           <button type="button" class="btn btn-secondary btn-block" id="last-btn" data-action="open-last" data-text="start.lastResultButton" aria-describedby="last-date" hidden></button>
           <p class="hint hint-center" id="last-date" hidden></p>
         </div>
+
+        <!-- ご利用にあたっての注意（記録は開き方ごとに別々に保存されるため） -->
+        <section class="notice notice-muted opening-note" aria-labelledby="opening-title">
+          <h2 class="opening-title" id="opening-title" data-text="start.openingTitle"></h2>
+          <p data-text="start.openingLead"></p>
+          <ul class="opening-list" id="opening-notes"></ul>
+        </section>
 
         <p class="provider" data-text="meta.provider"></p>
       </section>
@@ -176,7 +183,10 @@
           </div>
         </div>
 
-        <p class="again" data-text="summary.again"></p>
+        <div class="again">
+          <p class="again-text" data-text="summary.again"></p>
+          <p class="again-note no-print" data-text="summary.againNote"></p>
+        </div>
 
         <section class="closing no-print">
           <h3 class="section-title" data-text="closing.title"></h3>
