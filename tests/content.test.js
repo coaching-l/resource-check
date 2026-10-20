@@ -127,5 +127,8 @@ test("文言の置き換え用の {名前} が、使う側とそろっている"
   assert.ok(C.result.worst.includes("{name}"));
   assert.ok(C.reflect.title.includes("{name}"));
   assert.ok(C.result.previousLegend.includes("{date}"));
+  assert.ok(C.summary.nameLine.includes("{name}"));
+  assert.ok(C.summary.printTitle.includes("{date}"));
+  assert.ok(C.summary.printTitleWithName.includes("{name}") && C.summary.printTitleWithName.includes("{date}"));
   assert.ok(C.common.date.includes("{y}") && C.common.date.includes("{m}") && C.common.date.includes("{d}"));
 });
